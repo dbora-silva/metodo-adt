@@ -6,3 +6,6 @@ services:
       - "80:80"
     volumes:
       - .:/usr/share/nginx/html
+      - ~/.ssh/id_ed25519_metodo_adt:/ssh-keys/id_ed25519_metodo_adt:ro
+      - ~/.ssh/id_ed25519_metodo_adt.pub:/ssh-keys/id_ed25519_metodo_adt.pub:ro
+      - ~/.ssh/known_hosts:/ssh-keys/known_hosts
