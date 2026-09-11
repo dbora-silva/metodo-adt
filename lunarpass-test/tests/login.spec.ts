@@ -1,21 +1,55 @@
 import { test, expect } from '@playwright/test';
 
-test('Deve autenticar o Controle de Missões', async ({ page }) => {
-  
-  // AAA Patern
+import { LoginPage } from '../pages/login.page';
+import { Navbar } from '../pages/components/navbar';
+
+let loginPage: LoginPage;
+let navbar: Navbar;
+
+test.beforeEach(async ({ page }) => {
+  loginPage = new LoginPage(page);
+  navbar = new Navbar(page);
   // Arrange - Preparação do cenário
-  await page.goto('http://localhost:3001/mission-control/login'); 
+  await loginPage.go();
+});
 
-  const title = page.getByRole('heading', { name: 'Mission Control' });
-  await expect(title).toBeVisible();
 
+test('Deve autenticar o Controle de Missões', async ({ page }) => {
   // Act - Execução da ação
-  await page.getByLabel('E-mail').fill('buzz@lunarpass.dev');
-  await page.getByLabel('Senha').fill('pwd123');
-  await page.getByRole('button', { name: 'Entrar' }).click();
+  await loginPage.login('buzz@lunarpass.dev', 'pwd123');
 
   // Assert - Verificação do resultado
-  const logoutButton = page.getByRole('button', { name: 'Sair' });
-  await expect(logoutButton).toBeVisible();
+  await expect(navbar.logoutButton).toBeVisible();
 });  
 
+test('Deve falhar a autenticação com senha inválida', async ({ page }) => {
+  // Act - Execução da ação
+  await loginPage.login('buzz@lunarpass.dev', 'wrongpassword');
+
+  // Assert - Verificação do resultado
+  await expect(loginPage.alert).toHaveText('E-mail ou senha inválidos.');
+});
+
+test('Deve falhar a autenticação com e-mail não cadastrado', async ({ page }) => {
+  // Act - Execução da ação
+  await loginPage.login('nonexistent@lunarpass.dev', 'pwd123');
+
+  // Assert - Verificação do resultado
+  await expect(loginPage.alert).toHaveText('E-mail ou senha inválidos.');
+});
+
+test('Deve falhar quando a senha não for fornecida', async ({ page }) => {
+  // Act - Execução da ação
+  await loginPage.login('nonexistent@lunarpass.dev', '');
+
+  // Assert - Verificação do resultado
+  await expect(loginPage.alert).toHaveText('Informe a senha');
+});
+
+test('Deve falhar quando o e-mail não for fornecido', async ({ page }) => {
+  // Act - Execução da ação
+  await loginPage.login('', 'pwd123');
+
+  // Assert - Verificação do resultado
+  await expect(loginPage.alert).toHaveText('Informe um e-mail válido');
+});
