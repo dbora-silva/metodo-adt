@@ -19,7 +19,7 @@ test('Deve autenticar o Controle de Missões', async ({ page }) => {
   await loginPage.login('buzz@lunarpass.dev', 'pwd123');
 
   // Assert - Verificação do resultado
-  await expect(navbar.logoutButton).toBeVisible();
+  await expect(navbar.logout).toBeVisible();
 });  
 
 test('Deve falhar a autenticação com senha inválida', async ({ page }) => {

@@ -5,10 +5,12 @@ import { Mission } from '../../support/mission';
 export class RegisterPage {
   readonly page: Page;
   readonly title: Locator;
+  readonly idFormatError: Locator;
 
   constructor(page: Page) {
     this.page = page;
     this.title = page.getByRole('heading', { name: 'Programar missão' });
+    this.idFormatError = page.getByText('Use o formato LP-0000');
   }
 
   async submit(mission: Mission) {
