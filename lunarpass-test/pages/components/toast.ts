@@ -6,6 +6,8 @@ export class Toast {
 
   constructor(page: Page) {
     this.page = page;
-    this.message = page.getByRole('listitem');
+    // Escopa no region de notificações do Sonner para não colidir com outros
+    // elementos role="status" da página (ex.: indicadores de carregamento).
+    this.message = page.getByRole('region', { name: /Notifications/i }).getByRole('listitem');
   }
 }

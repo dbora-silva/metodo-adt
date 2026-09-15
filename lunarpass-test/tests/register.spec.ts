@@ -1,32 +1,36 @@
 import { test, expect } from '@playwright/test';
 
-import { LoginPage } from '../pages/components/login.page';
-import { DashPage } from '../pages/components/dash.page';
-import { RegisterPage } from '../pages/components/register.page';
+import { LoginPage } from '../pages/login.page';
+import { DashPage } from '../pages/dash.page';
+import { RegisterPage } from '../pages/register.page';
 import { Toast } from '../pages/components/toast';
 import { Navbar } from '../pages/components/navbar';
 import { faker } from '@faker-js/faker';
-import { Mission } from '../support/mission';
+import { createMission } from '../support/mission';
+import { DEMO_USER } from '../support/test-data';
 
-test('Deve cadastrar uma nova missão', async ({ page }) => {
+let loginPage: LoginPage;
+let dashPage: DashPage;
+let registerPage: RegisterPage;
+let navbar: Navbar;
+let toast: Toast;
 
-  const mission: Mission = {
-    id: 'LP-' + faker.string.alphanumeric({ length: { min: 5, max: 5 } }),
-    rocket: 'Starshitp',
-    lunarBase: 'aurora',
-    departureDate: '2028-01-20',
-    returnDate: '27 de jan. de 2028',
-    price: '1000'
-  };
-
-  const loginPage = new LoginPage(page);
-  const dashPage = new DashPage(page);
-  const registerPage = new RegisterPage(page);
-  const toast = new Toast(page);
+test.beforeEach(async ({ page }) => {
+  loginPage = new LoginPage(page);
+  dashPage = new DashPage(page);
+  registerPage = new RegisterPage(page);
+  navbar = new Navbar(page);
+  toast = new Toast(page);
 
   // Arrange - Preparação do cenário
   await loginPage.go();
-  await loginPage.login('buzz@lunarpass.dev', 'pwd123');
+  await loginPage.login(DEMO_USER.email, DEMO_USER.password);
+  await expect(navbar.logout).toBeVisible({ timeout: 10_000 });
+});
+
+test('Deve cadastrar uma nova missão', async () => {
+
+  const mission = createMission();
 
   await dashPage.addButton.click();
   await expect(registerPage.title).toBeVisible();
@@ -38,27 +42,11 @@ test('Deve cadastrar uma nova missão', async ({ page }) => {
   await expect(toast.message).toContainText('A nova missão foi adicionada ao catálogo e já está disponível para reservas.');
 });
 
-test('não deve cadastrar com código de missão incorreto', async ({ page }) => {
+test('Não deve cadastrar com código de missão incorreto', async () => {
 
-  const mission: Mission = {
-    id: faker.string.alphanumeric({ length: { min: 5, max: 5 }, casing: 'upper' }),
-    rocket: 'Starship',
-    lunarBase: 'aurora',
-    departureDate: '2028-01-20',
-    returnDate: '27 de jan. de 2028',
-    price: '1000'
-  }
-
-  const loginPage = new LoginPage(page);
-  const dashPage = new DashPage(page);
-  const registerPage = new RegisterPage(page);
-
-  const navbar = new Navbar(page);
-
-  // Arrange - Preparação do cenário
-  await loginPage.go();
-  await loginPage.login('buzz@lunarpass.dev', 'pwd123');
-  await expect(navbar.logout).toBeVisible({ timeout: 10_000 });
+  const mission = createMission({
+    id: faker.string.alphanumeric({ length: 5, casing: 'upper' }),
+  });
 
   await dashPage.addButton.click();
   await expect(registerPage.title).toBeVisible();
@@ -70,4 +58,13 @@ test('não deve cadastrar com código de missão incorreto', async ({ page }) =>
   await expect(registerPage.idFormatError).toBeVisible();
 });
 
+test('Não deve cadastrar com código duplicado', async () => {
 
+  const mission = createMission({ id: 'LP-DUP01' });
+
+  await dashPage.addButton.click();
+  await expect(registerPage.title).toBeVisible();
+  await registerPage.submit(mission);
+
+  await expect(registerPage.alert).toHaveText('Já existe uma missão com este ID.');
+});
