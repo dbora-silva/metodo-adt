@@ -2,9 +2,12 @@
 
 Suíte de testes end-to-end para a aplicação Lunar Pass, usando [Playwright](https://playwright.dev/).
 
+Para o panorama completo do projeto (contexto do curso, estratégia de locators, limitações e link para a análise de aderência), veja o [README da raiz do repositório](../README.md).
+
 ## Pré-requisitos
 
 - Node.js 20+
+- npm 10+
 - A aplicação [Lunar Pass](../lunar-pass) rodando localmente (veja abaixo)
 
 ## Instalação
@@ -13,23 +16,20 @@ Suíte de testes end-to-end para a aplicação Lunar Pass, usando [Playwright](h
 npm install
 ```
 
+Para uma instalação reprodutível (idêntica ao `package-lock.json`), use:
+
+```bash
+npm ci
+```
+
 ## Rodando a aplicação sob teste
 
-Os testes esperam a aplicação Lunar Pass rodando localmente. Em outro terminal, na pasta `lunar-pass/`:
+Os testes esperam a aplicação Lunar Pass rodando localmente. A aplicação fica em `lunar-pass/` e é um projeto Node/Yarn separado — seu gerenciador de pacotes não tem relação com o desta suíte.
+
+Em outro terminal, na pasta `lunar-pass/`:
 
 ```bash
 cd ../lunar-pass
-yarn start
-```
-
-Por padrão, a aplicação sobe em `http://localhost:3000`.
-
-### Rodando em outra porta (ex.: 3001)
-
-O servidor lê a variável de ambiente `PORT`. Para subir na porta `3001`:
-
-```bash
-# Git Bash / Linux / macOS
 PORT=3001 yarn start
 ```
 
@@ -39,28 +39,44 @@ $env:PORT = "3001"
 yarn start
 ```
 
-Depois, ajuste a URL usada nos testes (`page.goto(...)`) para apontar para `http://localhost:3001`.
+O `baseURL` padrão desta suíte (`http://localhost:3001`) já assume essa porta.
 
 ## Rodando os testes
 
 ```bash
-npx playwright test
+npm test
 ```
 
-Para ver o navegador durante a execução:
+Outros modos:
 
 ```bash
-npx playwright test --headed
-```
-
-Para depurar um teste passo a passo (abre o Playwright Inspector):
-
-```bash
-npx playwright test --debug
+npm run test:headed   # roda com o navegador visível
+npm run test:ui       # modo interativo (UI mode) do Playwright
+npm run test:debug    # depuração passo a passo (Playwright Inspector)
+npm run test:list     # lista os testes sem executá-los
 ```
 
 Para ver o relatório da última execução:
 
 ```bash
-npx playwright show-report
+npm run report
+```
+
+### Sobrescrevendo a URL da aplicação
+
+O `playwright.config.ts` lê a variável `BASE_URL`, com fallback para `http://localhost:3001`:
+
+```bash
+BASE_URL=http://localhost:3000 npm test
+```
+
+```powershell
+$env:BASE_URL = "http://localhost:3000"
+npm test
+```
+
+### Typecheck
+
+```bash
+npm run typecheck
 ```
