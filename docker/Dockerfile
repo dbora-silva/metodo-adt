@@ -1,7 +1,5 @@
 FROM nginx:1.27-alpine
 
-RUN apk add --no-cache git openssh-client
-
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
 COPY docker/docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
