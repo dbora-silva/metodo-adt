@@ -22,6 +22,16 @@ Para uma instalação reprodutível (idêntica ao `package-lock.json`), use:
 npm ci
 ```
 
+### Variáveis de ambiente
+
+Os testes que preparam massa de dados diretamente no banco (`support/db.ts`, usado por `register.spec.ts`) leem a connection string do Postgres/Supabase pela variável `DATABASE_URL`. Copie o exemplo e preencha com suas credenciais:
+
+```bash
+cp .env.example .env
+```
+
+`.env` não é versionado.
+
 ## Rodando a aplicação sob teste
 
 Os testes esperam a aplicação Lunar Pass rodando localmente. A aplicação fica em `lunar-pass/` e é um projeto Node/Yarn separado — seu gerenciador de pacotes não tem relação com o desta suíte.

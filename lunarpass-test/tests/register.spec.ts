@@ -6,8 +6,9 @@ import { RegisterPage } from '../pages/register.page';
 import { Toast } from '../pages/components/toast';
 import { Navbar } from '../pages/components/navbar';
 import { faker } from '@faker-js/faker';
-import { createMission } from '../support/mission';
+import { Mission } from '../support/types';
 import { DEMO_USER } from '../support/test-data';
+import { deleteMission, deleteReservetion, deleteTicket, insertMission } from '../support/db';
 
 let loginPage: LoginPage;
 let dashPage: DashPage;
@@ -30,7 +31,18 @@ test.beforeEach(async ({ page }) => {
 
 test('Deve cadastrar uma nova missão', async () => {
 
-  const mission = createMission();
+  const mission: Mission = {
+    id: 'LP-0128A',
+    rocket: 'Starship',
+    baseId: 'aurora',
+    departureDate: '2028-01-20',
+    returnDate: '27 de jan. de 2028',
+    price: 1000.00,
+  };
+
+  await deleteReservetion(mission.id);
+  await deleteTicket(mission.id);
+  await deleteMission(mission.id);
 
   await dashPage.addButton.click();
   await expect(registerPage.title).toBeVisible();
@@ -44,9 +56,14 @@ test('Deve cadastrar uma nova missão', async () => {
 
 test('Não deve cadastrar com código de missão incorreto', async () => {
 
-  const mission = createMission({
+  const mission: Mission = {
     id: faker.string.alphanumeric({ length: 5, casing: 'upper' }),
-  });
+    rocket: 'Starship',
+    baseId: 'aurora',
+    departureDate: '2028-01-20',
+    returnDate: '27 de jan. de 2028',
+    price: 1000.00,
+  };
 
   await dashPage.addButton.click();
   await expect(registerPage.title).toBeVisible();
@@ -60,7 +77,19 @@ test('Não deve cadastrar com código de missão incorreto', async () => {
 
 test('Não deve cadastrar com código duplicado', async () => {
 
-  const mission = createMission({ id: 'LP-DUP01' });
+  const mission: Mission = {
+    id: 'LP-DUP01',
+    rocket: 'Starship',
+    baseId: 'aurora',
+    departureDate: '2028-01-20',
+    returnDate: '27 de jan. de 2028',
+    price: 1000.00,
+  };
+
+  await deleteReservetion(mission.id);
+  await deleteTicket(mission.id);
+  await deleteMission(mission.id);
+  await insertMission(mission);
 
   await dashPage.addButton.click();
   await expect(registerPage.title).toBeVisible();
@@ -68,3 +97,4 @@ test('Não deve cadastrar com código duplicado', async () => {
 
   await expect(registerPage.alert).toHaveText('Já existe uma missão com este ID.');
 });
+
